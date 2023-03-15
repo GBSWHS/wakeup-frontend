@@ -43,7 +43,7 @@ function SearchModal ({ modalStatus, setModalStatus }: { modalStatus: boolean, s
         <small>
           <strong>노래 추가 정책</strong>
           <li>상대방이 불쾌할수 있는 표현이 포함되거나 성적인 표현이 들어가있는 음악 등록 금지</li>
-          <li>5분 이상의 재생 길이를 가진 음악 등록 제한</li>
+          <li>6분 이상의 재생 길이를 가진 음악 등록 제한</li>
           <li>음악이 아닌 유형(일반 영상) 등록 금지</li>
         </small>
         <input onChange={(e) => setQuery(e.target.value)} className='w-full bg-gray-200 p-2 mt-3 rounded-md' placeholder='노래 제목 입력'/>
