@@ -1,26 +1,34 @@
-import { useState } from 'react'
-
-export interface Music {
-  videoId: string
-  url: string
+export interface VoteMusic {
+  id: string,
   title: string
+  url: string
   thumbnail: string
-  author: {
-    name: string
-  }
+  artist: string
 }
 
-function VoteCard ({ musicData }: { musicData: Music }) {
+function VoteCard ({ musicData }: { musicData: VoteMusic }) {
+  async function voteMusic () {
+    if (!confirm('정말 ' + musicData.title + '노래를 추천하시겠습니까?')) return
+    const req = await fetch('/api/vote', {
+      method: 'POST',
+      headers: { 'Content-Type': 'application/json' },
+      body: JSON.stringify({ musicId: musicData.id })
+    }).then((res) => res.json())
+
+    if (!req.success) return alert(req.reason)
+    alert(req.body.title + '노래를 추천했습니다!')
+  }
+
   return (
-    <div className="shadow-xl rounded-md p-3 w-full bg-gray-50">
-      <div className='flex justify-between'>
-        <img src={musicData.thumbnail} alt='음악 로고' className='h-14 rounded-lg' />
-        <div className='ml-10'>
-          <h1 className='text-1xl font-bold text-right'>{musicData.title}</h1>
-          <p className='text-right'>{musicData.author.name}</p>
-        </div>
+    <div className="flex justify-between shadow-lg rounded-md p-3 w-74 bg-gray-50 mb-1">
+      <div>
+        <img src={musicData.thumbnail} alt='음악 로고' className='w-24 h-12 rounded-lg' />
+        <button onClick={voteMusic} className="w-24 bg-green-400 text-white rounded-lg mt-1 py-1 shadow-md hover:shadow-lg">투표</button>
       </div>
-      <button className='mt-3 shadow-sm hover:shadow-lg bg-red-400 p-1 text-white w-full rounded-lg'>투표</button>
+      <div className=''>
+        <a href={musicData.url} target='_blank'><h1 className='text-1xl font-bold text-right'>{musicData.title}</h1></a>
+        <p className='text-right'>{musicData.artist}</p>
+      </div>
     </div>
   )
 }

@@ -1,40 +1,33 @@
 import { useState } from 'react'
 import schoolLogo from './assets/logo.png'
-import MusicCard from './components/MusicCard'
 import VoteCard from './components/VoteCard'
+import SearchModal from './components/SearchModal'
+import useSwr from 'swr'
+import Loading from './components/Loading'
 
+const fetcher = (url: RequestInfo | URL) => fetch(url).then(r => r.json())
 function App() {
-  const [count, setCount] = useState(0)
+  const [modalIsOpen, setModalOpen] = useState<boolean>(false)
+  const { data: userData, error: userError } = useSwr('/api/auth/me', fetcher)
+  const { data: rankData, error: rankError } = useSwr('/api/vote', fetcher)
+  if (!userData || !rankData) return <Loading />
+  if (userError || rankError) return <div>오류가 발생하였습니다<br/>3-1. 임태현에게 문의</div>
+  if (!userData.success) location.href = '/api/auth/login'
+  if (!rankData.success) return <div>오류가 발생하였습니다<br/>3-1. 임태현에게 문의</div>
 
   return (
     <div className="flex h-screen">
-      <div className="m-auto w-6/12">
+      <div className="m-auto xl:w-3/12 lg:w-4/12 md:w-5/12 sm:w-6/12 w-9/12">
         <img src={schoolLogo} className='w-14' />
         <h1 className='text-2xl font-bold'>기상송</h1>
-        <div className='flex w-full gap-3'>
-          <div>
-            <h2 className='text-xl'>현재 순위</h2>
-            <div className='w-auto flex flex-col gap-1'>
-              <MusicCard musicData={{title: 'Drive to 1980 love', thumbnail: 'https://avatars.githubusercontent.com/u/44047052?v=4', author: {name: '제인팝'}, url: 'https://google.com', videoId: 'test' }} />
-              <MusicCard musicData={{title: 'Drive to 1980 love', thumbnail: 'https://avatars.githubusercontent.com/u/44047052?v=4', author: {name: '제인팝'}, url: 'https://google.com', videoId: 'test' }} />
-              <MusicCard musicData={{title: 'Drive to 1980 love', thumbnail: 'https://avatars.githubusercontent.com/u/44047052?v=4', author: {name: '제인팝'}, url: 'https://google.com', videoId: 'test' }} />
-            </div>
-          </div>
-          <div className='w-10/12'>
-            <h2 className='text-xl'>검색</h2>
-            <div className='flex-col w-auto mb-3'>
-              <input className='bg-gray-50 mb-1 w-full p-2 rounded-lg shadow-md' placeholder='노래 이름 검색' />
-              <button className='bg-blue-400 text-white w-full p-1 rounded-lg shadow-md'>검색</button>
-            </div>
-            <hr />
-            <div className='w-auto flex flex-col gap-1'>
-              <VoteCard musicData={{title: 'Drive to 1980 love', thumbnail: 'https://i.ytimg.com/vi/7HwgS7ZqhMA/hq720.jpg?sqp=-oaymwEcCNAFEJQDSFXyq4qpAw4IARUAAIhCGAFwAcABBg==&rs=AOn4CLCHoGS_6Z_dtBVX4b_75dQBDjBqoA', author: {name: '제인팝'}, url: 'https://google.com', videoId: 'test' }} />
-              <VoteCard musicData={{title: 'Drive to 1980 love', thumbnail: 'https://avatars.githubusercontent.com/u/44047052?v=4', author: {name: '제인팝'}, url: 'https://google.com', videoId: 'test' }} />
-              <VoteCard musicData={{title: 'Drive to 1980 love', thumbnail: 'https://avatars.githubusercontent.com/u/44047052?v=4', author: {name: '제인팝'}, url: 'https://google.com', videoId: 'test' }} />
-            </div>
-          </div>
+        <small>{userData.body.nickname}으로 로그인 됨</small>
+        <button onClick={() => setModalOpen(!modalIsOpen)} className="bg-blue-500 hover:bg-blue-700 text-white font-bold py-2 px-4 rounded w-full">노래 추가</button>
+        <h2 className='text-xl mt-4'>현재 순위</h2>
+        <div className='flex flex-col gap-1'>
+          { rankData.body.map((v: any) => <VoteCard musicData={v} key={v.music_id} />) }
         </div>
       </div>
+      <SearchModal modalStatus={modalIsOpen} setModalStatus={setModalOpen} />
     </div>
   )
 }
